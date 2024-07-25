@@ -341,6 +341,66 @@ BEGIN
 END;
 /
 
+-------------------------------------------------------------------------------
+
+/*
+    3. 예외처리부
+    
+    [표현법]
+    EXCEPTION
+        WHEN 예외명1 THEN 예외처리구문1;
+        WHEN 예외명2 THEN 예외처리구문2;
+        ...
+        WHEN OTHERS THEN 예외처리구문N;
+    
+    * 시스템예외 (미리 정의해둔 예외)
+      ㄴ NO_DATA_FOUND : SELECT한 결과가 한 행도 없을 경우
+      ㄴ TOO_MANY_ROWS : SELECT한 결과가 여러행일 경우 
+      ㄴ ZERO_DIVIDE   : 0으로 나눌 때
+      ㄴ DUP_VAL_ON_INDEX : UNIQUE 제약조건에 위배되었을 경우
+      ....
+        
+*/
+-- 사용자가 입력한 수로 나눈셈 연산한 결과 출력
+DECLARE
+    RESULT NUMBER;
+BEGIN
+    RESULT := 10 / &숫자;
+    DBMS_OUTPUT.PUT_LINE('결과: ' || RESULT);
+EXCEPTION
+    WHEN ZERO_DIVIDE THEN DBMS_OUTPUT.PUT_LINE('나누기 연산시 0으로 나눌 수 없습니다');
+END;
+/
+
+-- UNIQUE 제약조건 위배
+BEGIN
+    UPDATE EMPLOYEE
+       SET EMP_ID = '&변경할사번'
+     WHERE EMP_NAME = '노옹철';
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN DBMS_OUTPUT.PUT_LINE('이미 존재하는 사번입니다');
+END;
+/
+
+DECLARE
+    EID EMPLOYEE.EMP_ID%TYPE;
+    ENAME EMPLOYEE.EMP_NAME%TYPE;
+BEGIN
+    SELECT EMP_ID, EMP_NAME
+      INTO EID, ENAME
+      FROM EMPLOYEE
+     WHERE MANAGER_ID = '&사수사번';
+     
+    DBMS_OUTPUT.PUT_LINE('사번: ' || EID);
+    DBMS_OUTPUT.PUT_LINE('이름: ' || ENAME);
+EXCEPTION
+    WHEN TOO_MANY_ROWS THEN DBMS_OUTPUT.PUT_LINE('너무 많은 행이 조회되었습니다');
+    WHEN NO_DATA_FOUND THEN DBMS_OUTPUT.PUT_LINE('조회 결과가 없습니다');
+END;
+/
+
+
+
 
 
 
